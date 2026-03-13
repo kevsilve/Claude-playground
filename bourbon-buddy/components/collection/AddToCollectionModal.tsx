@@ -46,11 +46,14 @@ export function AddToCollectionModal({
           purchasePrice: purchasePrice ? parseFloat(purchasePrice) : null,
         }),
       })
-      if (!res.ok) throw new Error('Failed to save')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.detail || data.error || `HTTP ${res.status}`)
+      }
       onSuccess?.()
       onClose()
-    } catch {
-      setError('Failed to add to collection. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add to collection.')
     } finally {
       setSaving(false)
     }

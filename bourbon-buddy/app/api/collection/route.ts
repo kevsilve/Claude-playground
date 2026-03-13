@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(entry, { status: 201 })
   } catch (error) {
     console.error('Collection POST error:', error)
-    return NextResponse.json({ error: 'Failed to add to collection' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: 'Failed to add to collection', detail: message }, { status: 500 })
   }
 }
