@@ -1,7 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { BottleData } from './types'
 
-const client = new Anthropic()
+let _client: Anthropic | null = null
+function getClient() {
+  if (!_client) _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  return _client
+}
 
 const BOTTLE_IDENTIFICATION_PROMPT = `You are an expert bourbon and whiskey sommelier with encyclopedic knowledge of American whiskey.
 
@@ -30,7 +34,7 @@ If you cannot identify the bottle, return:
 {"error": "Could not identify bottle", "confidence": "low"}`
 
 export async function scanBottle(imageBase64: string, mimeType: string): Promise<BottleData> {
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     messages: [
@@ -54,6 +58,8 @@ export async function scanBottle(imageBase64: string, mimeType: string): Promise
     ],
   })
 
-  const text = (response.content[0] as { type: string; text: string }).text
+  const raw = (response.content[0] as { type: string; text: string }).text
+  // Strip markdown code fences if Claude wraps JSON in them
+  const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
   return JSON.parse(text) as BottleData
 }

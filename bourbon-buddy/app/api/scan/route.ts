@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('Scan error:', error)
-    return NextResponse.json({ error: 'Failed to scan bottle' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: 'Failed to scan bottle', detail: message }, { status: 500 })
   }
 }
