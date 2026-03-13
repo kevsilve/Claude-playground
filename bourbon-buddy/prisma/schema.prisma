@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Bottle {
+  id          String   @id @default(cuid())
+  name        String
+  distillery  String
+  age         String?
+  proof       Float?
+  mashBill    String?
+  region      String?
+  type        String?
+  flavorNotes String?
+  description String?
+  priceRange  String?
+  createdAt   DateTime @default(now())
+
+  entries CollectionEntry[]
+}
+
+model CollectionEntry {
+  id            String    @id @default(cuid())
+  bottleId      String
+  bottle        Bottle    @relation(fields: [bottleId], references: [id], onDelete: Cascade)
+  status        String    @default("sealed")
+  pourLevel     Int?      @default(100)
+  rating        Float?
+  notes         String?
+  purchasePrice Float?
+  purchaseDate  DateTime?
+  addedAt       DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
